@@ -8,6 +8,15 @@
   revision = "58854f77ee8d858ce751b0a9bcc5533fef7bfa9e"
 
 [[projects]]
+  name = "github.com/eclipse/paho.mqtt.golang"
+  packages = [
+    ".",
+    "packets"
+  ]
+  revision = "36d01c2b4cbeb3d2a12063e4880ce30800af9560"
+  version = "v1.1.1"
+
+[[projects]]
   name = "github.com/konsorten/go-windows-terminal-sequences"
   packages = ["."]
   revision = "5c8c8bd35d3832f5d134ae1e1e375b69a4d25242"
@@ -36,6 +45,16 @@
 
 [[projects]]
   branch = "master"
+  name = "golang.org/x/net"
+  packages = [
+    "internal/socks",
+    "proxy",
+    "websocket"
+  ]
+  revision = "927f97764cc334a6575f4b7a1584a147864d5723"
+
+[[projects]]
+  branch = "master"
   name = "golang.org/x/sys"
   packages = [
     "unix",
@@ -46,6 +65,6 @@
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "bba96a476ea5bc53366bbc870f5ccd3c06a1aa78b2f7537ab6a0fa65e136df14"
+  inputs-digest = "c04cec2805c6ea46ff505e4333b8f75647ecd5978f4499e08f0319ca66495e81"
   solver-name = "gps-cdcl"
   solver-version = 1
