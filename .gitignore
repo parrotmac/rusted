@@ -14,3 +14,6 @@ vendor/
 .DS_Store
 
 # TODO: Windows
+
+# VIM tempfiles
+*.swp
