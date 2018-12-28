@@ -1,4 +1,5 @@
 # Possible output dirs
+bin/
 dist/
 out/
 build/
