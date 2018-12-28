@@ -1,0 +1,15 @@
+# Possible output dirs
+dist/
+out/
+build/
+
+# Dep
+vendor/
+
+# IntelliJ Stuff
+.idea/
+
+# macOS
+.DS_Store
+
+# TODO: Windows
