@@ -18,7 +18,7 @@ OK ATH
 OK ATZ
 
 # Define PDP context 
-OK AT+CGDCONT=1,"IP","wireless.twilio.com"
+OK AT+CGDCONT=1,"IP","wholesale"
 
 # ATDT = Attention Dial Tone
 OK ATDT*99***1#

@@ -2,7 +2,7 @@
 
 set -e
 
-pppd call twilio &
+pppd call mint &
 
 trap : TERM INT; sleep infinity & wait
 

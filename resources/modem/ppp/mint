@@ -1,6 +1,6 @@
 # The options script can specify the device used for the PPP dial-up connection, string transmission speed, hardware acceleration, overflow, and more
 
-connect "/usr/sbin/chat -v -f /etc/chatscripts/twilio"
+connect "/usr/sbin/chat -v -f /etc/chatscripts/mint
 
 # Where is modem connect?
 # Device needs to be in modem mode

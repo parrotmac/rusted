@@ -19,8 +19,8 @@ RUN apt-get update && apt-get install -y \
 	vim \
 	&& rm -rf /var/lib/apt/lists/*
 
-COPY resources/modem/ppp/twilio /etc/ppp/peers/twilio
-COPY resources/modem/chatscripts/twilio /etc/chatscripts/twilio
+COPY resources/modem/ppp/mint /etc/ppp/peers/mint
+COPY resources/modem/chatscripts/mint /etc/chatscripts/mint
 
 COPY resources/start.sh /start.sh
 CMD ["/start.sh"]
