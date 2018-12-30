@@ -2,6 +2,12 @@
 
 
 [[projects]]
+  name = "github.com/adrianmo/go-nmea"
+  packages = ["."]
+  revision = "548226f132ebebaa1f93b35d8db04dad4e806f68"
+  source = "github.com/parrotmac/go-nmea"
+
+[[projects]]
   branch = "master"
   name = "github.com/creack/goselect"
   packages = ["."]
@@ -60,11 +66,11 @@
     "unix",
     "windows"
   ]
-  revision = "b4a75ba826a64a70990f11a225237acd6ef35c9f"
+  revision = "9a3f9b0469bbc6b8802087ae5c0af9f61502de01"
 
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "c04cec2805c6ea46ff505e4333b8f75647ecd5978f4499e08f0319ca66495e81"
+  inputs-digest = "2f63ba683b0f29ba9685acae6016df4d12cca91f4a737919fc9b6a96f6b1ae23"
   solver-name = "gps-cdcl"
   solver-version = 1

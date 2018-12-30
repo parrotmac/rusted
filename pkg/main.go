@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"github.com/parrotmac/rusted/pkg/gnss"
 	"os"
 	"time"
 
@@ -40,15 +41,34 @@ func (r *Rusted) initApp() {
 
 	r.remote = &server.Remote{}
 
-	wrapper := r.remote.ConnectMqttWrapper("tcp://mqtt.stag9.com:1883")
+	err = r.remote.ConnectMqttWrapper("tcp://mqtt.stag9.com:1883")
+	if err != nil {
+		// TODO: Retry instead of copping out
+		logrus.Fatalf("Unable to connect to MQTT broker")
+	}
 
-	wrapper.ATCommandHandler = func(atCommand string) string {
-		resp, err := r.dev.SendModemCommandWithDeadline(atCommand, time.Second*1)
-		if err != nil {
-			logrus.Errorf("Got err: %v", err)
-			return ""
-		}
-		return resp
+	//r.remote..ATCommandHandler = func(atCommand string) string {
+	//	resp, err := r.dev.SendModemCommandWithDeadline(atCommand, time.Second*1)
+	//	if err != nil {
+	//		logrus.Errorf		("Got err: %v", err)
+	//		return ""
+	//	}
+	//	return resp
+	//}
+
+	gnssWrapper, err := gnss.StartReceiver("/dev/ttyACM0", 115200)
+	if err != nil {
+		logrus.Debugln("Unable to start GPS receiver: %v\n\tIn the future this ^ should be retried", err)
+	} else {
+		gnssWrapper.SetBasicUpdateDelegate(func(l gnss.BasicLocation) {
+			logrus.Debugln("Basic GNSS Update: %v", l)
+			r.remote.PublishBasicLocationUpdate(l)
+		})
+		gnssWrapper.SetAdvancedUpdateDelegate(func(l gnss.AdvancedLocation) {
+			logrus.Debugln("Advanced GNSS Update: %v", l)
+			r.remote.PublishAdvancedLocationUpdate(l)
+		})
+		go gnssWrapper.Run()
 	}
 
 	r.Features = &utils.Features{

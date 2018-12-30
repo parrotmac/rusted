@@ -182,6 +182,13 @@ func FindLowSpeedHuaweiModemPort() (*Device, error) {
 		return nil, err
 	}
 	for _, portName := range portCandidates {
+
+		// TODO: Remove hack
+		if portName == "/dev/ttyACM0" {
+			continue
+		}
+		// TODO: End: Remove hack
+
 		device, err := checkPort(portName)
 		if err != nil {
 			logrus.Debugf("Err with %s: %v", portName, err)

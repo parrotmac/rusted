@@ -1,5 +1,11 @@
 package server
 
+import (
+	"encoding/json"
+	"github.com/parrotmac/rusted/pkg/gnss"
+	"github.com/sirupsen/logrus"
+)
+
 type Remote struct {
 	httpBaseURL string
 
@@ -23,9 +29,14 @@ func (r *Remote) maintainMqttConnection() {
 	}
 }
 
-func (r *Remote) ConnectMqttWrapper(mqttBrokerURL string) *MqttWrapper {
-	_, wrapper := connectMqttWrapper(mqttBrokerURL)
-	return wrapper
+func (r *Remote) ConnectMqttWrapper(mqttBrokerURL string) error {
+	err, wrapper := connectMqttWrapper(mqttBrokerURL)
+	if err != nil {
+		logrus.Warnf("Unable to connect to MQTT broker: %v", err)
+		return err
+	}
+	r.mqttWrapper = wrapper
+	return nil
 }
 
 func (r *Remote) GetMqttConnectionIsValid() bool {
@@ -48,4 +59,24 @@ func (r *Remote) PublishCarrierStatus(carrier string) error {
 
 func (r *Remote) PublishSignalStrengthStatus(signalDbm string) error {
 	return nil
+}
+
+func (r *Remote) PublishBasicLocationUpdate(location gnss.BasicLocation) {
+	locationData, err := json.Marshal(location)
+	if err != nil {
+		logrus.Warnf("Unable to marshal JSON message: %v", err)
+	}
+	if r.mqttWrapper != nil && r.mqttWrapper.mqttClient != nil && (*r.mqttWrapper.mqttClient).IsConnected() {
+		(*r.mqttWrapper.mqttClient).Publish("event/yogurt/location/basic", 1, false, locationData)
+	}
+}
+
+func (r *Remote) PublishAdvancedLocationUpdate(location gnss.AdvancedLocation) {
+	locationData, err := json.Marshal(location)
+	if err != nil {
+		logrus.Warnf("Unable to marshal JSON message: %v", err)
+	}
+	if r.mqttWrapper != nil && r.mqttWrapper.mqttClient != nil && (*r.mqttWrapper.mqttClient).IsConnected() {
+		(*r.mqttWrapper.mqttClient).Publish("event/yogurt/location/advanced", 1, false, locationData)
+	}
 }
