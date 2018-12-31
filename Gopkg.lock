@@ -3,49 +3,64 @@
 
 [[projects]]
   branch = "master"
+  digest = "1:210dd3b6f30ebc5ff2e0b4795b5141ee4578c29b38df0326fb140863d45c01fa"
   name = "github.com/creack/goselect"
   packages = ["."]
+  pruneopts = "UT"
   revision = "58854f77ee8d858ce751b0a9bcc5533fef7bfa9e"
 
 [[projects]]
+  digest = "1:0a69a1c0db3591fcefb47f115b224592c8dfa4368b7ba9fae509d5e16cdc95c8"
   name = "github.com/konsorten/go-windows-terminal-sequences"
   packages = ["."]
+  pruneopts = "UT"
   revision = "5c8c8bd35d3832f5d134ae1e1e375b69a4d25242"
   version = "v1.0.1"
 
 [[projects]]
+  digest = "1:69b1cc331fca23d702bd72f860c6a647afd0aa9fcbc1d0659b1365e26546dd70"
   name = "github.com/sirupsen/logrus"
   packages = ["."]
+  pruneopts = "UT"
   revision = "bcd833dfe83d3cebad139e4a29ed79cb2318bf95"
   version = "v1.2.0"
 
 [[projects]]
   branch = "master"
+  digest = "1:177147c6beea9efbe2e2f58b17ff1686f084ac7d7f4b6a36e085f8cb98e106a0"
   name = "go.bug.st/serial.v1"
   packages = [
     ".",
-    "unixutils"
+    "unixutils",
   ]
+  pruneopts = "UT"
   revision = "5f7892a7bb453066bdc6683b9b5d24d9dee03ec1"
 
 [[projects]]
   branch = "master"
+  digest = "1:38f553aff0273ad6f367cb0a0f8b6eecbaef8dc6cb8b50e57b6a81c1d5b1e332"
   name = "golang.org/x/crypto"
   packages = ["ssh/terminal"]
+  pruneopts = "UT"
   revision = "505ab145d0a99da450461ae2c1a9f6cd10d1f447"
 
 [[projects]]
   branch = "master"
+  digest = "1:3d5e79e10549fd9119cbefd614b6d351ef5bd0be2f2b103a4199788e784cbc68"
   name = "golang.org/x/sys"
   packages = [
     "unix",
-    "windows"
+    "windows",
   ]
+  pruneopts = "UT"
   revision = "b4a75ba826a64a70990f11a225237acd6ef35c9f"
 
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "bba96a476ea5bc53366bbc870f5ccd3c06a1aa78b2f7537ab6a0fa65e136df14"
+  input-imports = [
+    "github.com/sirupsen/logrus",
+    "go.bug.st/serial.v1",
+  ]
   solver-name = "gps-cdcl"
   solver-version = 1
