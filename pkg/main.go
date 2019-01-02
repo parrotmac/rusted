@@ -2,13 +2,13 @@ package main
 
 import (
 	"fmt"
-	"github.com/parrotmac/rusted/pkg/gnss"
+	"github.com/parrotmac/rusted/pkg/device/gnss"
 	"os"
 	"time"
 
 	"github.com/sirupsen/logrus"
 
-	"github.com/parrotmac/rusted/pkg/modem"
+	"github.com/parrotmac/rusted/pkg/device/modem"
 	"github.com/parrotmac/rusted/pkg/server"
 	"github.com/parrotmac/rusted/pkg/utils"
 )
@@ -39,7 +39,9 @@ func (r *Rusted) initApp() {
 	}
 	r.dev = dev
 
-	r.remote = &server.Remote{}
+	r.remote = server.NewRemote()
+	r.remote.SetupCommandReceivers()
+	r.remote.SetupReporting()
 
 	err = r.remote.ConnectMqttWrapper("tcp://mqtt.stag9.com:1883")
 	if err != nil {
@@ -58,7 +60,7 @@ func (r *Rusted) initApp() {
 
 	gnssWrapper, err := gnss.StartReceiver("/dev/ttyACM0", 115200)
 	if err != nil {
-		logrus.Debugln("Unable to start GPS receiver: %v\n\tIn the future this ^ should be retried", err)
+		logrus.Debugf("Unable to start GPS receiver: %v <- In the future this should be retried", err)
 	} else {
 		gnssWrapper.SetBasicUpdateDelegate(func(l gnss.BasicLocation) {
 			logrus.Debugln("Basic GNSS Update: %v", l)

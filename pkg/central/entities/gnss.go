@@ -1,4 +1,4 @@
-package gnss
+package entities
 
 import "github.com/adrianmo/go-nmea"
 
@@ -19,6 +19,10 @@ type AdvancedLocation struct {
 	Time           Time    `json:"time"`
 }
 
+type GroundSpeed struct {
+	SpeedKPH float64 `json:"speed_kph"`
+}
+
 // Basically just go-nmea's location
 type Time struct {
 	Hour        int `json:"h"`
@@ -36,7 +40,7 @@ func timeFromNmeaTime(time nmea.Time) Time {
 	}
 }
 
-func newBasicLocationFromGLL(gll nmea.GLL) BasicLocation {
+func NewBasicLocationFromGLL(gll nmea.GLL) BasicLocation {
 	return BasicLocation{
 		Latitude:  nmea.FormatGPS(gll.Latitude),
 		Longitude: nmea.FormatGPS(gll.Longitude),
@@ -44,12 +48,18 @@ func newBasicLocationFromGLL(gll nmea.GLL) BasicLocation {
 	}
 }
 
-func newAdvancedLocationFromGGA(gga nmea.GGA) AdvancedLocation {
+func NewAdvancedLocationFromGGA(gga nmea.GGA) AdvancedLocation {
 	return AdvancedLocation{
 		Latitude:       nmea.FormatGPS(gga.Latitude),
 		Longitude:      nmea.FormatGPS(gga.Longitude),
 		SatelliteCount: gga.NumSatellites,
 		Altitude:       gga.Altitude,
 		Time:           timeFromNmeaTime(gga.Time),
+	}
+}
+
+func NewGroundSpeedFromVTG(vgg nmea.VTG) GroundSpeed {
+	return GroundSpeed{
+		SpeedKPH: vgg.GroundSpeedKPH,
 	}
 }

@@ -1,14 +1,17 @@
 package gnss
 
 import (
+	"strings"
+
 	"github.com/adrianmo/go-nmea"
 	"github.com/sirupsen/logrus"
 	"go.bug.st/serial.v1"
-	"strings"
+
+	"github.com/parrotmac/rusted/pkg/central/entities"
 )
 
-type BasicLocationUpdateDelegate func(l BasicLocation)
-type AdvancedLocationUpdateDelegate func(l AdvancedLocation)
+type BasicLocationUpdateDelegate func(l entities.BasicLocation)
+type AdvancedLocationUpdateDelegate func(l entities.AdvancedLocation)
 
 type serialReceiver struct {
 	deviceAddress string
@@ -66,7 +69,7 @@ func (sr *serialReceiver) notifyGLLUpdate(gll nmea.GLL) {
 	if sr.basicUpdateDelegate != nil {
 		if gll.Validity == "A" || sr.skipValidityChecks {
 			logrus.Debugf("Notifying of update to gll: %v", gll)
-			sr.basicUpdateDelegate(newBasicLocationFromGLL(gll))
+			sr.basicUpdateDelegate(entities.NewBasicLocationFromGLL(gll))
 			return
 		}
 		logrus.Debugf("Not notifying of update to gll: %v because of bad validity", gll)
@@ -79,7 +82,7 @@ func (sr *serialReceiver) notifyGGAUpdate(gga nmea.GGA) {
 	if sr.advancedUpdateDelegate != nil {
 		if gga.FixQuality != "0" || sr.skipValidityChecks {
 			logrus.Debugf("Notifying of update to gga: %v", gga)
-			sr.advancedUpdateDelegate(newAdvancedLocationFromGGA(gga))
+			sr.advancedUpdateDelegate(entities.NewAdvancedLocationFromGGA(gga))
 			return
 		}
 		logrus.Debugf("Not notifying of update to gga: %v because of bad fix quality", gga)
