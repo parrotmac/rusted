@@ -7,7 +7,7 @@ type PeriodicUpdate struct {
 	FrequencySeconds int
 }
 
-type Update struct {
+type StatusReportingConfig struct {
 	ModemStatus PeriodicUpdate
 	Location    PeriodicUpdate
 }

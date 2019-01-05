@@ -2,6 +2,9 @@ package transport
 
 import (
 	"encoding/json"
+	"errors"
+	"fmt"
+	"github.com/parrotmac/rusted/pkg/central"
 
 	"github.com/sirupsen/logrus"
 
@@ -9,20 +12,12 @@ import (
 )
 
 type Remote struct {
-	httpBaseURL string
-
-	mqttConnectionValid bool
-	mqttBrokerURL       string
-	mqttWrapper         *MqttWrapper
-
-	deviceIdentifier string
-
 	ReportTypes  ReportTypes
 	CommandTypes CommandTypes
 }
 
 type Report struct {
-	// Used as suffix to mqtt pub topic
+	// Used as suffix to mqttClient pub topic
 	// for 'Basic Location' the `TypeID` would be '/loc/basic'
 	TypeID string
 }
@@ -56,15 +51,15 @@ func (r *Remote) SetupReporting() {
 	}
 
 	r.ReportTypes.DetailedLocation = Report{
-		TypeID: "loc/detail",
+		TypeID: "/loc/detail",
 	}
 
 	r.ReportTypes.CellCarrier = Report{
-		TypeID: "cell/carrier",
+		TypeID: "/cell/carrier",
 	}
 
 	r.ReportTypes.CellQuality = Report{
-		TypeID: "cell/quality",
+		TypeID: "/cell/quality",
 	}
 }
 
@@ -89,38 +84,27 @@ func (r *Remote) SetupCommandReceivers() {
 	}
 }
 
-func NewRemote() *Remote {
-	return &Remote{}
-}
-
 /*
 This might turn into a goroutine that connects and manages reconnections independently
 */
 // This is a goroutine that's called
-func (r *Remote) maintainMqttConnection() {
+func (w *MqttWrapper) maintainMqttConnection() {
 	retries := -1 // First connection is free
 
 	for {
-		if !(*r.mqttWrapper.mqttClient).IsConnected() {
-
+		if !(*w.mqttClient).IsConnected() {
 			retries++
 		}
 	}
 }
 
-func (r *Remote) ConnectMqttWrapper(mqttBrokerURL string) error {
-	err, wrapper := connectMqttWrapper(mqttBrokerURL)
+func ConnectMqttWrapper(cfg MqttConfig) (*MqttWrapper, error) {
+	err, wrapper := connectMqttWrapper(cfg.BrokerURL)
 	if err != nil {
 		logrus.Warnf("Unable to connect to MQTT broker: %v", err)
-		return err
+		return nil, err
 	}
-	r.mqttWrapper = wrapper
-	return nil
-}
-
-func (r *Remote) GetMqttConnectionIsValid() bool {
-	// Other components may wish to check the health of the connection
-	return r.mqttConnectionValid
+	return wrapper, nil
 }
 
 /*****************************************************
@@ -140,22 +124,45 @@ func (r *Remote) PublishSignalStrengthStatus(signalDbm string) error {
 	return nil
 }
 
-func (r *Remote) PublishBasicLocationUpdate(location entities.BasicLocation) {
-	locationData, err := json.Marshal(location)
+func (w *MqttWrapper) publishToTopic(topic string, data interface{}) error {
+	dataPayload, err := json.Marshal(data)
 	if err != nil {
-		logrus.Warnf("Unable to marshal JSON message: %v", err)
+		return err
 	}
-	if r.mqttWrapper != nil && r.mqttWrapper.mqttClient != nil && (*r.mqttWrapper.mqttClient).IsConnected() {
-		(*r.mqttWrapper.mqttClient).Publish("event/yogurt/location/basic", 1, false, locationData)
+	if w.mqttClient != nil && (*w.mqttClient).IsConnected() {
+		(*w.mqttClient).Publish(topic, 1, false, dataPayload)
+	} else {
+		return errors.New("mqttClient is nil or is not connected")
 	}
+	return nil
 }
 
-func (r *Remote) PublishAdvancedLocationUpdate(location entities.AdvancedLocation) {
-	locationData, err := json.Marshal(location)
+func (w *MqttWrapper) ReportBasicLocation(ctx *central.Context, location entities.BasicLocation) error {
+	topic := fmt.Sprintf("evt/%s/loc/basic", ctx.ClientIdentifier)
+	err := w.publishToTopic(topic, location)
 	if err != nil {
-		logrus.Warnf("Unable to marshal JSON message: %v", err)
+		logrus.Warnf("Unable to publish: %v", err)
+		return err
 	}
-	if r.mqttWrapper != nil && r.mqttWrapper.mqttClient != nil && (*r.mqttWrapper.mqttClient).IsConnected() {
-		(*r.mqttWrapper.mqttClient).Publish("event/yogurt/location/advanced", 1, false, locationData)
+	return nil
+}
+
+func (w *MqttWrapper) ReportDetailedLocation(ctx *central.Context, location entities.AdvancedLocation) error {
+	topic := fmt.Sprintf("evt/%s/loc/detail", ctx.ClientIdentifier)
+	err := w.publishToTopic(topic, location)
+	if err != nil {
+		logrus.Warnf("Unable to publish: %v", err)
+		return err
 	}
+	return nil
+}
+
+func (w *MqttWrapper) ReportCellQuality(ctx *central.Context, quality entities.CellQuality) error {
+	topic := fmt.Sprintf("evt/%s/cell/quality", ctx.ClientIdentifier)
+	err := w.publishToTopic(topic, quality)
+	if err != nil {
+		logrus.Warnf("Unable to publish: %v", err)
+		return err
+	}
+	return nil
 }

@@ -1,11 +1,16 @@
-package mqtt
+package transport
 
 import (
 	"github.com/eclipse/paho.mqtt.golang"
 	log "github.com/sirupsen/logrus"
 )
 
+type MqttConfig struct {
+	BrokerURL string
+}
+
 type MqttWrapper struct {
+	MqttConfig       *MqttConfig
 	mqttClient       *mqtt.Client
 	onConnect        func()
 	ATCommandHandler func(atCommand string) string

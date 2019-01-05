@@ -1,82 +1,62 @@
 package main
 
 import (
-	"fmt"
-	"github.com/parrotmac/rusted/pkg/device/gnss"
 	"os"
 	"time"
 
 	"github.com/sirupsen/logrus"
 
-	"github.com/parrotmac/rusted/pkg/device/modem"
-	"github.com/parrotmac/rusted/pkg/server"
-	"github.com/parrotmac/rusted/pkg/utils"
+	"github.com/parrotmac/rusted/pkg/central"
+	"github.com/parrotmac/rusted/pkg/central/services"
+	"github.com/parrotmac/rusted/pkg/device/gnss"
+	"github.com/parrotmac/rusted/pkg/transport"
 )
 
 type Rusted struct {
-	*utils.Features
-	remote *server.Remote
-	dev    *modem.Device
+	*central.Context
+	*services.LocationService
+	*services.CellularService
+	*transport.MqttWrapper
+}
+
+func (r *Rusted) initContext() {
+	r.Context = &central.Context{
+		ClientIdentifier: "yogurt",
+	}
 }
 
 func (r *Rusted) initApp() {
 	logrus.Debugln("[APP INIT] Starting Init")
 
-	portNames, err := modem.GetPortNames()
+	mqttWrapper, err := transport.ConnectMqttWrapper(getMqttConfig())
 	if err != nil {
-		logrus.Printf("Error listing serial ports: %v", err)
+		logrus.Fatalln(err)
 	}
+	r.MqttWrapper = mqttWrapper
 
-	for _, port := range portNames {
-		fmt.Printf("Found serial port: %v\n", port)
-	}
-
-	dev, err := modem.FindLowSpeedHuaweiModemPort()
+	gnssReceiver, err := gnss.StartReceiver("/dev/ttyACM0", 115200)
 	if err != nil {
-		logrus.Warnf("Failure finding Huawei modem: %v", err)
-	} else {
-		logrus.Println("Found Huawei device!")
+		logrus.Warnf("Failed to open GPS receiver: %v", err)
+		logrus.Warnln("No retry logic is implemented, program will now terminate")
+		os.Exit(-1)
 	}
-	r.dev = dev
+	locService := services.CreateLocationReportingService(r.Context, gnssReceiver, r.MqttWrapper)
+	r.LocationService = &locService
 
-	r.remote = server.NewRemote()
-	r.remote.SetupCommandReceivers()
-	r.remote.SetupReporting()
+	locService.RunService()
+}
 
-	err = r.remote.ConnectMqttWrapper("tcp://mqtt.stag9.com:1883")
-	if err != nil {
-		// TODO: Retry instead of copping out
-		logrus.Fatalf("Unable to connect to MQTT broker")
+func getHttpConfig() transport.HttpConfig {
+	return transport.HttpConfig{
+		SeverBaseURL:   "https://api.example.com:8080",
+		DefaultTimeout: time.Duration(time.Second * 5),
 	}
+}
 
-	//r.remote..ATCommandHandler = func(atCommand string) string {
-	//	resp, err := r.dev.SendModemCommandWithDeadline(atCommand, time.Second*1)
-	//	if err != nil {
-	//		logrus.Errorf		("Got err: %v", err)
-	//		return ""
-	//	}
-	//	return resp
-	//}
-
-	gnssWrapper, err := gnss.StartReceiver("/dev/ttyACM0", 115200)
-	if err != nil {
-		logrus.Debugf("Unable to start GPS receiver: %v <- In the future this should be retried", err)
-	} else {
-		gnssWrapper.SetBasicUpdateDelegate(func(l gnss.BasicLocation) {
-			logrus.Debugln("Basic GNSS Update: %v", l)
-			r.remote.PublishBasicLocationUpdate(l)
-		})
-		gnssWrapper.SetAdvancedUpdateDelegate(func(l gnss.AdvancedLocation) {
-			logrus.Debugln("Advanced GNSS Update: %v", l)
-			r.remote.PublishAdvancedLocationUpdate(l)
-		})
-		go gnssWrapper.Run()
+func getMqttConfig() transport.MqttConfig {
+	return transport.MqttConfig{
+		BrokerURL: "tcp://mqtt.stag9.com:1883",
 	}
-
-	r.Features = &utils.Features{
-		MockSerial: utils.GetEnvBool("RUSTED_MOCK_SERIAL"),
-	}
-	logrus.Debugln("[APP INIT] Init Finished")
 }
 
 func (r *Rusted) runLoop() {
@@ -93,6 +73,7 @@ func main() {
 	logrus.SetLevel(logrus.DebugLevel)
 
 	r := &Rusted{}
+	r.initContext()
 
 	r.initApp()
 
