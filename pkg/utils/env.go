@@ -5,8 +5,12 @@ import (
 	"strings"
 )
 
-func GetEnvValue(keyName string) string {
-	return os.Getenv(keyName)
+func TryGetEnvValue(keyName string, fallback string) string {
+	val, set := os.LookupEnv(keyName)
+	if set {
+		return val
+	}
+	return fallback
 }
 
 func GetEnvBool(keyName string) bool {
