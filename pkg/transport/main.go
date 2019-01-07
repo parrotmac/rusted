@@ -1,14 +1,7 @@
 package transport
 
 import (
-	"encoding/json"
-	"errors"
-	"fmt"
-	"github.com/parrotmac/rusted/pkg/central"
-
 	"github.com/sirupsen/logrus"
-
-	"github.com/parrotmac/rusted/pkg/central/entities"
 )
 
 type Remote struct {
@@ -121,48 +114,5 @@ func (r *Remote) PublishCarrierStatus(carrier string) error {
 }
 
 func (r *Remote) PublishSignalStrengthStatus(signalDbm string) error {
-	return nil
-}
-
-func (w *MqttWrapper) publishToTopic(topic string, data interface{}) error {
-	dataPayload, err := json.Marshal(data)
-	if err != nil {
-		return err
-	}
-	if w.mqttClient != nil && (*w.mqttClient).IsConnected() {
-		(*w.mqttClient).Publish(topic, 1, false, dataPayload)
-	} else {
-		return errors.New("mqttClient is nil or is not connected")
-	}
-	return nil
-}
-
-func (w *MqttWrapper) ReportBasicLocation(ctx *central.Context, location entities.BasicLocation) error {
-	topic := fmt.Sprintf("evt/%s/loc/basic", ctx.ClientIdentifier)
-	err := w.publishToTopic(topic, location)
-	if err != nil {
-		logrus.Warnf("Unable to publish: %v", err)
-		return err
-	}
-	return nil
-}
-
-func (w *MqttWrapper) ReportDetailedLocation(ctx *central.Context, location entities.AdvancedLocation) error {
-	topic := fmt.Sprintf("evt/%s/loc/detail", ctx.ClientIdentifier)
-	err := w.publishToTopic(topic, location)
-	if err != nil {
-		logrus.Warnf("Unable to publish: %v", err)
-		return err
-	}
-	return nil
-}
-
-func (w *MqttWrapper) ReportCellQuality(ctx *central.Context, quality entities.CellQuality) error {
-	topic := fmt.Sprintf("evt/%s/cell/quality", ctx.ClientIdentifier)
-	err := w.publishToTopic(topic, quality)
-	if err != nil {
-		logrus.Warnf("Unable to publish: %v", err)
-		return err
-	}
 	return nil
 }

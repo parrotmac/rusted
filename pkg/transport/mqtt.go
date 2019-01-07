@@ -1,8 +1,13 @@
 package transport
 
 import (
+	"encoding/json"
+	"errors"
+	"fmt"
 	"github.com/eclipse/paho.mqtt.golang"
-	log "github.com/sirupsen/logrus"
+	"github.com/parrotmac/rusted/pkg/central"
+	"github.com/parrotmac/rusted/pkg/central/entities"
+	"github.com/sirupsen/logrus"
 )
 
 type MqttConfig struct {
@@ -37,7 +42,7 @@ func connectMqttWrapper(brokerURL string) (error, *MqttWrapper) {
 
 func (w *MqttWrapper) attachSubscriptions(client mqtt.Client) {
 	client.Subscribe("cmd/yogurt/status", 1, func(client mqtt.Client, message mqtt.Message) {
-		log.Infoln(string(message.Payload()))
+		logrus.Infoln(string(message.Payload()))
 	})
 	//if token.Wait() && token.Error() != nil {
 	//
@@ -51,7 +56,50 @@ func (w *MqttWrapper) attachSubscriptions(client mqtt.Client) {
 				cli.Publish("reply/yogurt/at-cmd", 2, true, resp)
 			}
 		} else {
-			log.Warnln("Got empty payload :(")
+			logrus.Warnln("Got empty payload :(")
 		}
 	})
+}
+
+func (w *MqttWrapper) publishToTopic(topic string, data interface{}) error {
+	dataPayload, err := json.Marshal(data)
+	if err != nil {
+		return err
+	}
+	if w.mqttClient != nil && (*w.mqttClient).IsConnected() {
+		(*w.mqttClient).Publish(topic, 1, false, dataPayload)
+	} else {
+		return errors.New("mqttClient is nil or is not connected")
+	}
+	return nil
+}
+
+func (w *MqttWrapper) ReportBasicLocation(ctx *central.Context, location entities.BasicLocation) error {
+	topic := fmt.Sprintf("evt/%s/loc/basic", ctx.ClientIdentifier)
+	err := w.publishToTopic(topic, location)
+	if err != nil {
+		logrus.Warnf("Unable to publish: %v", err)
+		return err
+	}
+	return nil
+}
+
+func (w *MqttWrapper) ReportDetailedLocation(ctx *central.Context, location entities.AdvancedLocation) error {
+	topic := fmt.Sprintf("evt/%s/loc/detail", ctx.ClientIdentifier)
+	err := w.publishToTopic(topic, location)
+	if err != nil {
+		logrus.Warnf("Unable to publish: %v", err)
+		return err
+	}
+	return nil
+}
+
+func (w *MqttWrapper) ReportCellQuality(ctx *central.Context, quality entities.CellQuality) error {
+	topic := fmt.Sprintf("evt/%s/cell/quality", ctx.ClientIdentifier)
+	err := w.publishToTopic(topic, quality)
+	if err != nil {
+		logrus.Warnf("Unable to publish: %v", err)
+		return err
+	}
+	return nil
 }
