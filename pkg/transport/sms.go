@@ -4,10 +4,12 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+
+	"github.com/sirupsen/logrus"
+
 	"github.com/parrotmac/rusted/pkg/central"
 	"github.com/parrotmac/rusted/pkg/central/entities"
 	"github.com/parrotmac/rusted/pkg/device/modem"
-	"github.com/sirupsen/logrus"
 )
 
 type SMSConfig struct {
