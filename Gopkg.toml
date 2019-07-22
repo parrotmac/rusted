@@ -31,5 +31,4 @@
 
 [[constraint]]
   name = "github.com/adrianmo/go-nmea"
-  source = "github.com/parrotmac/go-nmea"
-  revision = "548226f132ebebaa1f93b35d8db04dad4e806f68"
+  branch = "master"
