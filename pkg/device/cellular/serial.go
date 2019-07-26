@@ -1,4 +1,4 @@
-package modem
+package cellular
 
 import (
 	"errors"

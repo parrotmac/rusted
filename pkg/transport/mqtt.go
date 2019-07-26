@@ -1,6 +1,7 @@
 package transport
 
 import (
+	"context"
 	"encoding/json"
 	"errors"
 	"fmt"
@@ -8,7 +9,6 @@ import (
 	"github.com/eclipse/paho.mqtt.golang"
 	"github.com/sirupsen/logrus"
 
-	"github.com/parrotmac/rusted/pkg/central"
 	"github.com/parrotmac/rusted/pkg/central/entities"
 )
 
@@ -21,15 +21,18 @@ type MqttWrapper struct {
 	mqttClient       *mqtt.Client
 	onConnect        func()
 	ATCommandHandler func(atCommand string) string
+	ClientID         string
 }
 
 func connectMqttWrapper(brokerURL string) (error, *MqttWrapper) {
-	wrapper := MqttWrapper{}
+	wrapper := MqttWrapper{
+		ClientID: "7dfa82ff-1989-44a7-a9fd-befddfb93ad9",
+	}
 	opts := &mqtt.ClientOptions{}
 
 	opts.AddBroker(brokerURL)
 	opts.CleanSession = true
-	opts.ClientID = "7dfa82ff-1989-44a7-a9fd-befddfb93ad9"
+	opts.ClientID = wrapper.ClientID
 	opts.OnConnect = wrapper.attachSubscriptions
 
 	client := mqtt.NewClient(opts)
@@ -76,8 +79,8 @@ func (w *MqttWrapper) publishToTopic(topic string, data interface{}) error {
 	return nil
 }
 
-func (w *MqttWrapper) ReportBasicLocation(ctx *central.Context, location entities.BasicLocation) error {
-	topic := fmt.Sprintf("evt/%s/loc/basic", ctx.ClientIdentifier)
+func (w *MqttWrapper) SendLocationReport(ctx context.Context, location entities.GNSSData) error {
+	topic := fmt.Sprintf("evt/%s/loc", w.ClientID)
 	err := w.publishToTopic(topic, location)
 	if err != nil {
 		logrus.Warnf("Unable to publish: %v", err)
@@ -86,9 +89,9 @@ func (w *MqttWrapper) ReportBasicLocation(ctx *central.Context, location entitie
 	return nil
 }
 
-func (w *MqttWrapper) ReportDetailedLocation(ctx *central.Context, location entities.AdvancedLocation) error {
-	topic := fmt.Sprintf("evt/%s/loc/detail", ctx.ClientIdentifier)
-	err := w.publishToTopic(topic, location)
+func (w *MqttWrapper) SendCellInfoReport(ctx context.Context, report *entities.ModemReport) error {
+	topic := fmt.Sprintf("evt/%s/cell", w.ClientID)
+	err := w.publishToTopic(topic, report)
 	if err != nil {
 		logrus.Warnf("Unable to publish: %v", err)
 		return err
@@ -96,8 +99,8 @@ func (w *MqttWrapper) ReportDetailedLocation(ctx *central.Context, location enti
 	return nil
 }
 
-func (w *MqttWrapper) ReportCellQuality(ctx *central.Context, quality entities.CellQuality) error {
-	topic := fmt.Sprintf("evt/%s/cell/quality", ctx.ClientIdentifier)
+func (w *MqttWrapper) ReportCellQuality(ctx context.Context, quality entities.ModemReport) error {
+	topic := fmt.Sprintf("evt/%s/cell/quality", w.ClientID)
 	err := w.publishToTopic(topic, quality)
 	if err != nil {
 		logrus.Warnf("Unable to publish: %v", err)

@@ -1,16 +1,20 @@
 package entities
 
-import "github.com/parrotmac/rusted/pkg/central"
+import (
+	"context"
+)
 
 // MQTT and SMS should both implement this interface
 type LocationUpdateTransport interface {
-	ReportBasicLocation(ctx *central.Context, loc BasicLocation) error
-	ReportDetailedLocation(ctx *central.Context, loc AdvancedLocation) error
+	SendLocationReport(ctx context.Context, locationData GNSSData) error
 }
 
-// Serial GPS receivers
+type CellInfoTransport interface {
+	SendCellInfoReport(ctx context.Context, report *ModemReport) error
+}
+
+// Serial GPS receivers, or a gpsd client
 type LocationProvider interface {
-	GetBasicLocation(ctx *central.Context) (BasicLocation, error)
-	GetDetailedLocation(ctx *central.Context) (AdvancedLocation, error)
-	Start(ctx *central.Context) error
+	SetOnLocationUpdatedHandler(func(locationData GNSSData))
+	Start() error
 }

@@ -1,7 +1,6 @@
 package gnss
 
 import (
-	"errors"
 	"strings"
 	"time"
 
@@ -9,12 +8,8 @@ import (
 	"github.com/sirupsen/logrus"
 	"go.bug.st/serial.v1"
 
-	"github.com/parrotmac/rusted/pkg/central"
 	"github.com/parrotmac/rusted/pkg/central/entities"
 )
-
-type BasicLocationUpdateDelegate func(l entities.BasicLocation)
-type AdvancedLocationUpdateDelegate func(l entities.AdvancedLocation)
 
 type serialReceiver struct {
 	deviceAddress string
@@ -22,51 +17,28 @@ type serialReceiver struct {
 
 	serialPort *serial.Port
 
-	skipValidityChecks bool
-
-	basicUpdateDelegate    BasicLocationUpdateDelegate
-	advancedUpdateDelegate AdvancedLocationUpdateDelegate
-
 	// TODO: Break these out
 	readValueTimeout time.Duration
 
-	basicLocationLastReadTime time.Time
-	basicLocationLast         entities.BasicLocation
+	gnssData entities.GNSSData
 
-	advancedLocationLastReadTime time.Time
-	advancedLocationLast         entities.AdvancedLocation
+	onLocationUpdated func(data entities.GNSSData)
 }
 
-func (sr *serialReceiver) Start(ctx *central.Context) error {
+func (sr *serialReceiver) SetOnLocationUpdatedHandler(callback func(data entities.GNSSData)) {
+	sr.onLocationUpdated = callback
+}
+
+func (sr *serialReceiver) notifyLocationUpdated() {
+	if sr.onLocationUpdated != nil {
+		sr.onLocationUpdated(sr.gnssData)
+	}
+}
+
+func (sr *serialReceiver) Start() error {
 	// TODO: Rethink this
-	go sr.processMessagesContinually()
+	sr.processMessagesContinually()
 	return nil
-}
-
-func (sr *serialReceiver) GetBasicLocation(ctx *central.Context) (entities.BasicLocation, error) {
-	oldReadTime := sr.basicLocationLastReadTime
-	startTime := time.Now()
-	for {
-		if sr.basicLocationLastReadTime.After(oldReadTime) {
-			return sr.basicLocationLast, nil
-		}
-		if time.Now().After(startTime.Add(sr.readValueTimeout)) {
-			return entities.BasicLocation{}, errors.New("timeout waiting for new basic location data")
-		}
-	}
-}
-
-func (sr *serialReceiver) GetDetailedLocation(ctx *central.Context) (entities.AdvancedLocation, error) {
-	oldReadTime := sr.advancedLocationLastReadTime
-	startTime := time.Now()
-	for {
-		if sr.advancedLocationLastReadTime.After(oldReadTime) {
-			return sr.advancedLocationLast, nil
-		}
-		if time.Now().After(startTime.Add(sr.readValueTimeout)) {
-			return entities.AdvancedLocation{}, errors.New("timeout waiting for new advanced location data")
-		}
-	}
 }
 
 func (sr *serialReceiver) openPort() (*serial.Port, error) {
@@ -83,10 +55,9 @@ func (sr *serialReceiver) openPort() (*serial.Port, error) {
 
 func StartReceiver(deviceAddress string, baudRate int) (*serialReceiver, error) {
 	sr := &serialReceiver{
-		deviceAddress:      deviceAddress,
-		baudRate:           baudRate,
-		skipValidityChecks: false,
-		readValueTimeout:   time.Duration(time.Second * 2),
+		deviceAddress:    deviceAddress,
+		baudRate:         baudRate,
+		readValueTimeout: time.Duration(time.Second * 2),
 	}
 
 	port, err := sr.openPort()
@@ -96,60 +67,6 @@ func StartReceiver(deviceAddress string, baudRate int) (*serialReceiver, error) 
 	sr.serialPort = port
 
 	return sr, nil
-}
-
-func (sr *serialReceiver) SetValitiyChecking(enforceValitity bool) {
-	sr.skipValidityChecks = !enforceValitity
-}
-
-func (sr *serialReceiver) SetBasicUpdateDelegate(dataUpdatedDelegate BasicLocationUpdateDelegate) {
-	sr.basicUpdateDelegate = dataUpdatedDelegate
-}
-
-func (sr *serialReceiver) SetAdvancedUpdateDelegate(dataUpdatedDelegate AdvancedLocationUpdateDelegate) {
-	sr.advancedUpdateDelegate = dataUpdatedDelegate
-}
-
-func (sr *serialReceiver) notifyGLLUpdate(gll nmea.GLL) {
-
-	basicLoc := entities.NewBasicLocationFromGLL(gll)
-	logrus.Debugf("Notifying of update to gll: %v", gll)
-
-	// TODO: Separate these
-	sr.basicLocationLast = basicLoc
-	sr.basicLocationLastReadTime = time.Now()
-
-	// TODO: Reevaluate these
-	if sr.basicUpdateDelegate != nil {
-		if gll.Validity == "A" || sr.skipValidityChecks {
-			sr.basicUpdateDelegate(basicLoc)
-			return
-		}
-		logrus.Debugf("Not notifying of update to gll: %v because of bad validity", gll)
-	} else {
-		logrus.Debugln("basicUpdateDelegate isn't set")
-	}
-}
-
-func (sr *serialReceiver) notifyGGAUpdate(gga nmea.GGA) {
-
-	logrus.Debugf("Notifying of update to gga: %v", gga)
-	advLoc := entities.NewAdvancedLocationFromGGA(gga)
-
-	// TODO: Separate these
-	sr.advancedLocationLast = advLoc
-	sr.advancedLocationLastReadTime = time.Now()
-
-	// TODO: Reevaluate this
-	if sr.advancedUpdateDelegate != nil {
-		if gga.FixQuality != "0" || sr.skipValidityChecks {
-			sr.advancedUpdateDelegate(advLoc)
-			return
-		}
-		logrus.Debugf("Not notifying of update to gga: %v because of bad fix quality", gga)
-	} else {
-		logrus.Debugln("advancedUpdateDelegate isn't set")
-	}
 }
 
 func (sr *serialReceiver) processMessagesContinually() {
@@ -199,18 +116,19 @@ func (sr *serialReceiver) parseAndUpdate(sentence string) {
 		return
 	}
 
-	sentencePrefix := s.Prefix()
-
-	logrus.Debugln("sentencePrefix", sentencePrefix)
-
-	switch sentencePrefix {
-	// TODO; Make agnostic to talker type
-	case "GNGLL":
-		sr.notifyGLLUpdate(s.(nmea.GLL))
-		break
-	case "GNGGA":
-		sr.notifyGGAUpdate(s.(nmea.GGA))
-		break
+	switch s.DataType() {
+	case nmea.TypeGLL:
+		sr.gnssData.UpdateFromGLL(s.(nmea.GLL))
+		sr.notifyLocationUpdated()
+	case nmea.TypeGGA:
+		sr.gnssData.UpdateFromGGA(s.(nmea.GGA))
+		sr.notifyLocationUpdated()
+	case nmea.TypeVTG:
+		sr.gnssData.UpdateFromVTG(s.(nmea.VTG))
+		sr.notifyLocationUpdated()
+	case nmea.TypeZDA:
+		sr.gnssData.UpdateFromZDA(s.(nmea.ZDA))
+		sr.notifyLocationUpdated()
 	default:
 		logrus.Debugf("Unhandled sentence type: %v", s.String())
 	}
