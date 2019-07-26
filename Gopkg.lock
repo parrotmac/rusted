@@ -29,12 +29,36 @@
   version = "v1.1.1"
 
 [[projects]]
+  digest = "1:b3d20bcdedab2050e6bc58e52f4fdc46f710b4c74e1a1ecee262ebec1aee7b6e"
+  name = "github.com/godbus/dbus"
+  packages = ["."]
+  pruneopts = "UT"
+  revision = "2ff6f7ffd60f0f2410b3105864bdd12c7894f844"
+  version = "v5.0.1"
+
+[[projects]]
   digest = "1:0a69a1c0db3591fcefb47f115b224592c8dfa4368b7ba9fae509d5e16cdc95c8"
   name = "github.com/konsorten/go-windows-terminal-sequences"
   packages = ["."]
   pruneopts = "UT"
   revision = "5c8c8bd35d3832f5d134ae1e1e375b69a4d25242"
   version = "v1.0.1"
+
+[[projects]]
+  branch = "master"
+  digest = "1:ecfbf3fa8474b77367f307cfb1b4420621f40591a45555458451243a0cc71795"
+  name = "github.com/parrotmac/go-modemmanager"
+  packages = ["pkg/modem"]
+  pruneopts = "UT"
+  revision = "a57c768ea98fbfaf69e6942d6f5d37aa8837e2c2"
+
+[[projects]]
+  digest = "1:cf31692c14422fa27c83a05292eb5cbe0fb2775972e8f1f8446a71549bd8980b"
+  name = "github.com/pkg/errors"
+  packages = ["."]
+  pruneopts = "UT"
+  revision = "ba968bfe8b2f7e042a574c888954fccecfa385b4"
+  version = "v0.8.1"
 
 [[projects]]
   digest = "1:69b1cc331fca23d702bd72f860c6a647afd0aa9fcbc1d0659b1365e26546dd70"
@@ -46,6 +70,14 @@
 
 [[projects]]
   branch = "master"
+  digest = "1:de19a2506fa10aaf228493c957e72e0e246d876e3ad3e89be88980b1abcdc93a"
+  name = "github.com/stratoberry/go-gpsd"
+  packages = ["."]
+  pruneopts = "UT"
+  revision = "54ddcfa61f471b13a707324102a5c1f44c3b2910"
+
+[[projects]]
+  branch = "master"
   digest = "1:177147c6beea9efbe2e2f58b17ff1686f084ac7d7f4b6a36e085f8cb98e106a0"
   name = "go.bug.st/serial.v1"
   packages = [
@@ -54,6 +86,37 @@
   ]
   pruneopts = "UT"
   revision = "5f7892a7bb453066bdc6683b9b5d24d9dee03ec1"
+
+[[projects]]
+  digest = "1:a5158647b553c61877aa9ae74f4015000294e47981e6b8b07525edcbb0747c81"
+  name = "go.uber.org/atomic"
+  packages = ["."]
+  pruneopts = "UT"
+  revision = "df976f2515e274675050de7b3f42545de80594fd"
+  version = "v1.4.0"
+
+[[projects]]
+  digest = "1:60bf2a5e347af463c42ed31a493d817f8a72f102543060ed992754e689805d1a"
+  name = "go.uber.org/multierr"
+  packages = ["."]
+  pruneopts = "UT"
+  revision = "3c4937480c32f4c13a875a1829af76c98ca3d40a"
+  version = "v1.1.0"
+
+[[projects]]
+  digest = "1:676160e6a4722b08e0e26b11521d575c2cb2b6f0c679e1ee6178c5d8dee51e5e"
+  name = "go.uber.org/zap"
+  packages = [
+    ".",
+    "buffer",
+    "internal/bufferpool",
+    "internal/color",
+    "internal/exit",
+    "zapcore",
+  ]
+  pruneopts = "UT"
+  revision = "27376062155ad36be76b0f12cf1572a221d3a48c"
+  version = "v1.10.0"
 
 [[projects]]
   branch = "master"
@@ -92,8 +155,12 @@
   input-imports = [
     "github.com/adrianmo/go-nmea",
     "github.com/eclipse/paho.mqtt.golang",
+    "github.com/godbus/dbus",
+    "github.com/parrotmac/go-modemmanager/pkg/modem",
     "github.com/sirupsen/logrus",
+    "github.com/stratoberry/go-gpsd",
     "go.bug.st/serial.v1",
+    "go.uber.org/zap",
   ]
   solver-name = "gps-cdcl"
   solver-version = 1

@@ -1,8 +1,4 @@
-package modem
-
-import (
-	"github.com/parrotmac/rusted/pkg/central"
-)
+package cellular
 
 type CellModem interface {
 }
@@ -31,6 +27,6 @@ func CreateOutgoingSMS(destination string, body []byte) SMSMessage {
 }
 
 type SmsService interface {
-	SendMessage(ctx *central.Context, message SMSMessage) error
-	GetAllMessages(ctx *central.Context) ([]SMSMessage, error)
+	SendMessage(message SMSMessage) error
+	GetAllMessages() ([]SMSMessage, error)
 }

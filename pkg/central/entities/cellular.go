@@ -1,9 +1,16 @@
 package entities
 
-type CellQuality struct {
-	SignalStrength int `json:"signal_strength"`
+import (
+	"github.com/parrotmac/go-modemmanager/pkg/modem"
+)
+
+type CellInfoProvider interface {
+	Setup() error
+	FetchReport() (*ModemReport, error)
 }
 
-type CellCarrier struct {
-	CarrierName string `json:"carrier_name"`
+type ModemReport struct {
+	Modem  *modem.Modem  `json:"modem"`
+	Bearer *modem.Bearer `json:"bearer"`
+	Sim    *modem.Sim    `json:"sim"`
 }
