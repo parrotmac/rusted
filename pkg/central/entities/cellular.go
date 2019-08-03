@@ -10,7 +10,8 @@ type CellInfoProvider interface {
 }
 
 type ModemReport struct {
-	Modem  *modem.Modem  `json:"modem"`
-	Bearer *modem.Bearer `json:"bearer"`
-	Sim    *modem.Sim    `json:"sim"`
+	Modem    *modem.Modem    `json:"modem"`
+	Bearer   *modem.Bearer   `json:"bearer"`
+	Sim      *modem.Sim      `json:"sim"`
+	Location *modem.Location `json:"location"`
 }

@@ -3,30 +3,30 @@
 
 [[projects]]
   branch = "master"
-  digest = "1:2bdfd4f9ad24e89a3736075b336380902645f1370684068d228676fd68866054"
+  digest = "1:51ca429f394e47e0b855eb3f457cc879b91f57f40fbea852d285c25456e433e0"
   name = "github.com/adrianmo/go-nmea"
   packages = ["."]
   pruneopts = "UT"
-  revision = "9861e243767ddcbc01ec662adc18b97a35f2bbe7"
+  revision = "2310df0b9cbc7377188c3edc82909d27b266087b"
 
 [[projects]]
-  branch = "master"
-  digest = "1:210dd3b6f30ebc5ff2e0b4795b5141ee4578c29b38df0326fb140863d45c01fa"
+  digest = "1:b9085d533cf1bff1926c6e07f895c8fb0c8be1537235c459f86df81508b34d85"
   name = "github.com/creack/goselect"
   packages = ["."]
   pruneopts = "UT"
-  revision = "58854f77ee8d858ce751b0a9bcc5533fef7bfa9e"
+  revision = "c98c4e62c41618cf78d3ff759af0d4dbaa677748"
+  version = "v0.1.0"
 
 [[projects]]
-  digest = "1:184008c955d6a3226b700c13ed0e875a7a051a759618f9bccba9b5c99f17faa5"
+  digest = "1:bb89a2542933056fcebc2950bb15ec636e623cc43c96597288aa2009f15b0ce1"
   name = "github.com/eclipse/paho.mqtt.golang"
   packages = [
     ".",
     "packets",
   ]
   pruneopts = "UT"
-  revision = "36d01c2b4cbeb3d2a12063e4880ce30800af9560"
-  version = "v1.1.1"
+  revision = "adca289fdcf8c883800aafa545bc263452290bae"
+  version = "v1.2.0"
 
 [[projects]]
   digest = "1:b3d20bcdedab2050e6bc58e52f4fdc46f710b4c74e1a1ecee262ebec1aee7b6e"
@@ -37,20 +37,20 @@
   version = "v5.0.1"
 
 [[projects]]
-  digest = "1:0a69a1c0db3591fcefb47f115b224592c8dfa4368b7ba9fae509d5e16cdc95c8"
+  digest = "1:31e761d97c76151dde79e9d28964a812c46efc5baee4085b86f68f0c654450de"
   name = "github.com/konsorten/go-windows-terminal-sequences"
   packages = ["."]
   pruneopts = "UT"
-  revision = "5c8c8bd35d3832f5d134ae1e1e375b69a4d25242"
-  version = "v1.0.1"
+  revision = "f55edac94c9bbba5d6182a4be46d86a2c9b5b50e"
+  version = "v1.0.2"
 
 [[projects]]
   branch = "master"
-  digest = "1:ecfbf3fa8474b77367f307cfb1b4420621f40591a45555458451243a0cc71795"
+  digest = "1:b31f3d1a8b2b8181e6e6ab60afc898055698c3fd7b81e5fa4cfe37a1788d6acf"
   name = "github.com/parrotmac/go-modemmanager"
   packages = ["pkg/modem"]
   pruneopts = "UT"
-  revision = "a57c768ea98fbfaf69e6942d6f5d37aa8837e2c2"
+  revision = "9fdc6ac6ebc2378eb552e99c9580698489bd5a60"
 
 [[projects]]
   digest = "1:cf31692c14422fa27c83a05292eb5cbe0fb2775972e8f1f8446a71549bd8980b"
@@ -61,12 +61,12 @@
   version = "v0.8.1"
 
 [[projects]]
-  digest = "1:69b1cc331fca23d702bd72f860c6a647afd0aa9fcbc1d0659b1365e26546dd70"
+  digest = "1:04457f9f6f3ffc5fea48e71d62f2ca256637dee0a04d710288e27e05c8b41976"
   name = "github.com/sirupsen/logrus"
   packages = ["."]
   pruneopts = "UT"
-  revision = "bcd833dfe83d3cebad139e4a29ed79cb2318bf95"
-  version = "v1.2.0"
+  revision = "839c75faf7f98a33d445d181f3018b5c3409a45e"
+  version = "v1.4.2"
 
 [[projects]]
   branch = "master"
@@ -120,15 +120,7 @@
 
 [[projects]]
   branch = "master"
-  digest = "1:38f553aff0273ad6f367cb0a0f8b6eecbaef8dc6cb8b50e57b6a81c1d5b1e332"
-  name = "golang.org/x/crypto"
-  packages = ["ssh/terminal"]
-  pruneopts = "UT"
-  revision = "505ab145d0a99da450461ae2c1a9f6cd10d1f447"
-
-[[projects]]
-  branch = "master"
-  digest = "1:50095e42352dba1c6ab2cec7e03b24fb4b513123f41d4ab4dbd2627c25fe18b8"
+  digest = "1:32cf722ab04ef8b448f0a2142c9ec3217536fde41bc085a96eff65015897b034"
   name = "golang.org/x/net"
   packages = [
     "internal/socks",
@@ -136,18 +128,18 @@
     "websocket",
   ]
   pruneopts = "UT"
-  revision = "927f97764cc334a6575f4b7a1584a147864d5723"
+  revision = "ca1201d0de80cfde86cb01aea620983605dfe99b"
 
 [[projects]]
   branch = "master"
-  digest = "1:3d5e79e10549fd9119cbefd614b6d351ef5bd0be2f2b103a4199788e784cbc68"
+  digest = "1:f99b0e9035cf86cdc14cb2848308e831193d5e19ab9a23a8493cd925bdc3952b"
   name = "golang.org/x/sys"
   packages = [
     "unix",
     "windows",
   ]
   pruneopts = "UT"
-  revision = "b4a75ba826a64a70990f11a225237acd6ef35c9f"
+  revision = "fc99dfbffb4e5ed5758a37e31dd861afe285406b"
 
 [solve-meta]
   analyzer-name = "dep"

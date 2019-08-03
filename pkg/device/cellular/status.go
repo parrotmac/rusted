@@ -46,7 +46,8 @@ func (s *StatusProvider) FetchReport() (*entities.ModemReport, error) {
 
 	// Note - this only deals with the first modem returned
 	// Other modems could exist but won't show up
-	defaultModem, err := s.manager.GetModem(modemPaths[0])
+	defaultModemPath := modemPaths[0]
+	defaultModem, err := s.manager.GetModem(defaultModemPath)
 	if err != nil {
 		return nil, err
 	}
@@ -69,5 +70,13 @@ func (s *StatusProvider) FetchReport() (*entities.ModemReport, error) {
 			report.Sim = &sim
 		}
 	}
+
+	location, err := s.manager.CallGetModemLocation(defaultModemPath)
+	if err != nil {
+		s.Logger.Warn("modem.call_get_location.failure", zap.Error(err))
+	} else {
+		report.Location = location
+	}
+
 	return report, nil
 }
