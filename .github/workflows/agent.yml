@@ -18,6 +18,10 @@ jobs:
 
     - name: Get dependencies
       run: |
+        mkdir -p $GOPATH/bin
+        stat $GOPATH
+        stat $GOPATH/bin
+        printenv
         go get -v -t -d ./...
         if [ -f Gopkg.toml ]; then
             curl https://raw.githubusercontent.com/golang/dep/master/install.sh | sh
